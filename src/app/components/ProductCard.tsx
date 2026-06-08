@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, MessageCircle } from 'lucide-react';
 import { Product } from '../types';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { ProductComments } from './ProductComments';
 
 export type { Product };
 
@@ -24,6 +25,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const [selectedColor, setSelectedColor] = useState<string | undefined>(
     product.colors && product.colors.length === 1 ? product.colors[0] : undefined
   );
+  const [showComments, setShowComments] = useState(false);
 
   const needsSize = product.sizes && product.sizes.length > 0;
   const needsColor = product.colors && product.colors.length > 0;
@@ -145,7 +147,23 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           <ShoppingCart className="w-4 h-4" />
           {isOutOfStock ? 'Agotado' : 'Agregar'}
         </button>
+
+        {/* Botón comentarios */}
+        <button
+          onClick={() => setShowComments(true)}
+          className="mt-2 w-full flex items-center justify-center gap-2 py-1.5 px-4 rounded-md border border-border text-sm text-muted-foreground hover:bg-secondary transition-all"
+        >
+          <MessageCircle className="w-4 h-4" />
+          Comentarios
+        </button>
       </div>
+
+      {/* Modal comentarios */}
+      {showComments && (
+        <ProductComments product={product} onClose={() => setShowComments(false)} />
+      )}
     </div>
+  );
+}
   );
 }

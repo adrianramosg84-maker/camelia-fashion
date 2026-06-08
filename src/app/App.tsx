@@ -8,6 +8,8 @@ import { InventoryList } from './components/InventoryList';
 import { ShareLink } from './components/ShareLink';
 import { PaymentSettings } from './components/PaymentSettings';
 import { OrderHistory } from './components/OrderHistory';
+import { AdminComments } from './components/AdminComments';
+import { SalesReport } from './components/SalesReport';
 import { Product, CartItem } from './types';
 import { subscribeToProducts, saveProduct, deleteProduct } from './services/db';
 
@@ -26,6 +28,8 @@ export default function App() {
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isPaymentSettingsOpen, setIsPaymentSettingsOpen] = useState(false);
   const [isOrderHistoryOpen, setIsOrderHistoryOpen] = useState(false);
+  const [isAdminCommentsOpen, setIsAdminCommentsOpen] = useState(false);
+  const [isSalesReportOpen, setIsSalesReportOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const productSectionRef = useRef<HTMLDivElement>(null);
@@ -133,6 +137,8 @@ export default function App() {
         onShareClick={!isPublicView ? () => setIsShareOpen(true) : undefined}
         onPaymentSettingsClick={!isPublicView ? () => setIsPaymentSettingsOpen(true) : undefined}
         onOrdersClick={!isPublicView ? () => setIsOrderHistoryOpen(true) : undefined}
+        onCommentsClick={!isPublicView ? () => setIsAdminCommentsOpen(true) : undefined}
+        onSalesReportClick={!isPublicView ? () => setIsSalesReportOpen(true) : undefined}
         isPublicView={isPublicView}
         searchTerm={searchTerm}
         onSearchChange={(term) => { setSearchTerm(term); if (term) { setSelectedCategory('Todos'); productSectionRef.current?.scrollIntoView({ behavior: 'smooth' }); } }}
@@ -197,6 +203,8 @@ export default function App() {
       {!isPublicView && isShareOpen && <ShareLink onClose={() => setIsShareOpen(false)} />}
       {!isPublicView && isPaymentSettingsOpen && <PaymentSettings onClose={() => setIsPaymentSettingsOpen(false)} />}
       {!isPublicView && isOrderHistoryOpen && <OrderHistory onClose={() => setIsOrderHistoryOpen(false)} />}
+      {!isPublicView && isAdminCommentsOpen && <AdminComments onClose={() => setIsAdminCommentsOpen(false)} />}
+      {!isPublicView && isSalesReportOpen && <SalesReport onClose={() => setIsSalesReportOpen(false)} />}
 
       {!isPublicView && (
         <button onClick={() => { setEditingProduct(null); setIsInventoryOpen(true); }}

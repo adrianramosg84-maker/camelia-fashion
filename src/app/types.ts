@@ -44,3 +44,14 @@ export interface Order {
   paymentMethod: string;
   status: 'pending' | 'confirmed' | 'rejected';
 }
+
+export interface Comment {
+  id: string;
+  productId: number;
+  productName: string;
+  customerName: string;
+  text: string;
+  date: string;
+  reply?: string;
+  replyDate?: string;
+}

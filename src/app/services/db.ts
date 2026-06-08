@@ -93,3 +93,43 @@ export async function updateOrderStatus(orderId: string, status: 'confirmed' | '
     await setDoc(doc(db, 'orders', orderDoc.id), { ...orderDoc.data(), status }, { merge: true });
   }
 }
+
+// ─── Comentarios ──────────────────────────────────────────────────────────────
+
+export async function addComment(comment: Omit<import('../types').Comment, 'id'>) {
+  await addDoc(collection(db, 'comments'), comment);
+}
+
+export function subscribeToCommentsByProduct(
+  productId: number,
+  callback: (comments: import('../types').Comment[]) => void
+) {
+  const q = query(collection(db, 'comments'));
+  return onSnapshot(q, (snapshot) => {
+    const all = snapshot.docs
+      .map((d) => ({ ...d.data(), id: d.id } as import('../types').Comment))
+      .filter((c) => c.productId === productId)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    callback(all);
+  });
+}
+
+export function subscribeToAllComments(
+  callback: (comments: import('../types').Comment[]) => void
+) {
+  const q = query(collection(db, 'comments'));
+  return onSnapshot(q, (snapshot) => {
+    const all = snapshot.docs
+      .map((d) => ({ ...d.data(), id: d.id } as import('../types').Comment))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    callback(all);
+  });
+}
+
+export async function replyToComment(commentId: string, reply: string) {
+  await setDoc(
+    doc(db, 'comments', commentId),
+    { reply, replyDate: new Date().toISOString() },
+    { merge: true }
+  );
+}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ShoppingBag, User, Search, Package, Share2, Settings, List, X, ClipboardList } from 'lucide-react';
+import { ShoppingBag, User, Search, Package, Share2, Settings, List, X, ClipboardList, MessageCircle, TrendingUp } from 'lucide-react';
 import logoImg from '../../imports/Copilot_20260527_224643.png';
 
 interface HeaderProps {
@@ -11,6 +11,8 @@ interface HeaderProps {
   onShareClick?: () => void;
   onPaymentSettingsClick?: () => void;
   onOrdersClick?: () => void;
+  onCommentsClick?: () => void;
+  onSalesReportClick?: () => void;
   isPublicView?: boolean;
   searchTerm?: string;
   onSearchChange?: (term: string) => void;
@@ -25,6 +27,8 @@ export function Header({
   onShareClick,
   onPaymentSettingsClick,
   onOrdersClick,
+  onCommentsClick,
+  onSalesReportClick,
   isPublicView = false,
   searchTerm = '',
   onSearchChange,
@@ -112,12 +116,18 @@ export function Header({
             </button>
           )}
           {!isPublicView && onOrdersClick && (
-            <button
-              onClick={onOrdersClick}
-              className="p-2 hover:bg-secondary rounded-full transition-colors"
-              title="Historial de pedidos"
-            >
+            <button onClick={onOrdersClick} className="p-2 hover:bg-secondary rounded-full transition-colors" title="Historial de pedidos">
               <ClipboardList className="w-5 h-5" />
+            </button>
+          )}
+          {!isPublicView && onCommentsClick && (
+            <button onClick={onCommentsClick} className="p-2 hover:bg-secondary rounded-full transition-colors" title="Comentarios de clientes">
+              <MessageCircle className="w-5 h-5" />
+            </button>
+          )}
+          {!isPublicView && onSalesReportClick && (
+            <button onClick={onSalesReportClick} className="p-2 hover:bg-secondary rounded-full transition-colors" title="Informe de ventas">
+              <TrendingUp className="w-5 h-5" />
             </button>
           )}
           {!isPublicView && onInventoryListClick && (
