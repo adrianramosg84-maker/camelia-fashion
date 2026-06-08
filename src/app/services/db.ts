@@ -77,10 +77,17 @@ export function subscribeToOrders(callback: (orders: Order[]) => void) {
 }
 
 export async function deleteOrder(orderId: string) {
-  // Buscar el documento por campo id
   const snapshot = await getDocs(collection(db, 'orders'));
   const docToDelete = snapshot.docs.find((d) => d.data().id === orderId || d.id === orderId);
   if (docToDelete) {
     await deleteDoc(doc(db, 'orders', docToDelete.id));
+  }
+}
+
+export async function updateOrderStatus(orderId: string, status: 'confirmed' | 'rejected') {
+  const snapshot = await getDocs(collection(db, 'orders'));
+  const orderDoc = snapshot.docs.find((d) => d.data().id === orderId || d.id === orderId);
+  if (orderDoc) {
+    await setDoc(doc(db, 'orders', orderDoc.id), { ...orderDoc.data(), status }, { merge: true });
   }
 }

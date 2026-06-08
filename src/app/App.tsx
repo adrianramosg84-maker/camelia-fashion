@@ -59,32 +59,57 @@ export default function App() {
     setIsInventoryOpen(true);
   };
 
-  const handleAddToCart = (product: Product) => {
+  const handleAddToCart = (product: Product, selectedSize?: string, selectedColor?: string) => {
     if (product.stock === 0) return;
     setCartItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
+      // Buscar item con misma combinación de id + talla + color
+      const existing = prev.find(
+        (item) => item.id === product.id &&
+          item.selectedSize === selectedSize &&
+          item.selectedColor === selectedColor
+      );
       if (existing && existing.quantity >= product.stock) return prev;
-      if (existing) return prev.map((item) => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
-      return [...prev, { ...product, quantity: 1 }];
+      if (existing) {
+        return prev.map((item) =>
+          item.id === product.id &&
+          item.selectedSize === selectedSize &&
+          item.selectedColor === selectedColor
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prev, { ...product, quantity: 1, selectedSize, selectedColor }];
     });
   };
 
-  const handleUpdateQuantity = (id: number, quantity: number) => {
+  const handleUpdateQuantity = (id: number, quantity: number, selectedSize?: string, selectedColor?: string) => {
     const product = products.find((p) => p.id === id);
     if (!product) return;
-    setCartItems((prev) => prev.map((item) => item.id === id ? { ...item, quantity: Math.min(quantity, product.stock) } : item));
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item.id === id &&
+        item.selectedSize === selectedSize &&
+        item.selectedColor === selectedColor
+          ? { ...item, quantity: Math.min(quantity, product.stock) }
+          : item
+      )
+    );
   };
 
-  const handleRemoveItem = (id: number) => setCartItems((prev) => prev.filter((item) => item.id !== id));
+  const handleRemoveItem = (id: number, selectedSize?: string, selectedColor?: string) =>
+    setCartItems((prev) =>
+      prev.filter(
+        (item) =>
+          !(item.id === id &&
+            item.selectedSize === selectedSize &&
+            item.selectedColor === selectedColor)
+      )
+    );
   const handleClearCart = () => setCartItems([]);
 
-  const handlePurchaseSuccess = async (purchasedItems: CartItem[]) => {
-    for (const item of purchasedItems) {
-      const product = products.find((p) => p.id === item.id);
-      if (product) {
-        await saveProduct({ ...product, stock: Math.max(0, product.stock - item.quantity) });
-      }
-    }
+  // El stock NO se descuenta aquí — se descuenta cuando el admin confirma el pago
+  const handlePurchaseSuccess = async (_purchasedItems: CartItem[]) => {
+    // Solo limpia el carrito, el descuento de stock ocurre en OrderHistory al confirmar
   };
 
   const categories = ['Todos', 'Mujer', 'Niños', 'Accesorios'];

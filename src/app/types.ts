@@ -8,10 +8,14 @@ export interface Product {
   category: string;
   description: string;
   stock: number;
+  sizes?: string[];   // Tallas disponibles: S, M, L, XL, XXL, XXXL
+  colors?: string[];  // Colores disponibles
 }
 
 export interface CartItem extends Product {
   quantity: number;
+  selectedSize?: string;
+  selectedColor?: string;
 }
 
 export interface PaymentConfig {
@@ -38,5 +42,5 @@ export interface Order {
   items: CartItem[];
   total: number;
   paymentMethod: string;
-  status: 'pending' | 'confirmed';
+  status: 'pending' | 'confirmed' | 'rejected';
 }
