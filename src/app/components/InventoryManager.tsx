@@ -9,7 +9,11 @@ interface InventoryManagerProps {
   onClose: () => void;
 }
 
-const ALL_SIZES = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
+const SIZES_BY_CATEGORY: Record<string, string[]> = {
+  Mujer: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+  Niños: ['2', '4', '6', '8', '10', '12', '14', '16'],
+  Accesorios: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+};
 const PRESET_COLORS = [
   { name: 'Negro', hex: '#1a1a1a' },
   { name: 'Blanco', hex: '#ffffff' },
@@ -207,7 +211,10 @@ export function InventoryManager({ onAddProduct, onUpdateProduct, editProduct, o
           <div>
             <label className="block mb-2">Categoría *</label>
             <select value={formData.category}
-              onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
+              onChange={(e) => {
+                setFormData((prev) => ({ ...prev, category: e.target.value }));
+                setSelectedSizes([]); // limpiar tallas al cambiar categoría
+              }}
               className="w-full px-4 py-2 border border-border rounded-md bg-input-background">
               <option value="Mujer">Mujer</option>
               <option value="Niños">Niños</option>
@@ -219,7 +226,7 @@ export function InventoryManager({ onAddProduct, onUpdateProduct, editProduct, o
           <div>
             <label className="block mb-2">Tallas disponibles</label>
             <div className="flex flex-wrap gap-2">
-              {ALL_SIZES.map((size) => (
+              {(SIZES_BY_CATEGORY[formData.category] ?? SIZES_BY_CATEGORY['Mujer']).map((size) => (
                 <button key={size} type="button" onClick={() => toggleSize(size)}
                   className={`px-3 py-1.5 rounded-md border-2 text-sm font-medium transition-all ${
                     selectedSizes.includes(size)
