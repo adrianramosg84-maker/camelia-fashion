@@ -15,9 +15,11 @@ import { Product, PaymentConfig, Order } from '../types';
 // ─── Productos ────────────────────────────────────────────────────────────────
 
 export function subscribeToProducts(callback: (products: Product[]) => void) {
-  const q = query(collection(db, 'products'), orderBy('id', 'asc'));
+  const q = query(collection(db, 'products'));
   return onSnapshot(q, (snapshot) => {
     const products = snapshot.docs.map((d) => d.data() as Product);
+    // Ordenar en cliente por id
+    products.sort((a, b) => a.id - b.id);
     callback(products);
   });
 }
