@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { X, TrendingUp, Calendar, ShoppingBag, DollarSign, Package } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, TrendingUp, Calendar, ShoppingBag, DollarSign, Package, Printer } from 'lucide-react';
 import { Order } from '../types';
 import { subscribeToOrders } from '../services/db';
 
@@ -11,6 +11,7 @@ export function SalesReport({ onClose }: SalesReportProps) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'day' | 'month'>('day');
+  const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const unsub = subscribeToOrders((data) => {
@@ -62,6 +63,101 @@ export function SalesReport({ onClose }: SalesReportProps) {
 
   const monthName = now.toLocaleString('es-PE', { month: 'long', year: 'numeric' });
 
+  const handlePrint = () => {
+    const content = printRef.current;
+    if (!content) return;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Informe de Ventas - Camelia Fashion</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+            h1 { color: #C4A962; font-size: 22px; margin-bottom: 4px; }
+            h2 { font-size: 16px; color: #555; margin-bottom: 20px; }
+            .cards { display: flex; gap: 16px; margin-bottom: 24px; }
+            .card { flex: 1; border: 1px solid #ddd; border-radius: 8px; padding: 16px; text-align: center; }
+            .card .value { font-size: 24px; font-weight: bold; }
+            .card .label { font-size: 12px; color: #888; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+            th { background: #f5f5f5; padding: 8px; text-align: left; font-size: 13px; }
+            td { padding: 8px; border-bottom: 1px solid #eee; font-size: 13px; }
+            .section-title { font-size: 14px; font-weight: bold; margin: 20px 0 8px; color: #555; }
+            .total { font-weight: bold; color: #22a85a; }
+            @media print { body { padding: 10px; } }
+          </style>
+        </head>
+        <body>
+          <h1>Camelia Fashion — Informe de Ventas</h1>
+          <h2>${view === 'day' ? `Hoy — ${new Date().toLocaleDateString('es-PE')}` : `Mes — ${monthName}`}</h2>
+
+          <div class="cards">
+            <div class="card">
+              <div class="value">${currentOrders.length}</div>
+              <div class="label">Pedidos confirmados</div>
+            </div>
+            <div class="card">
+              <div class="value total">S/ ${totalRevenue.toFixed(2)}</div>
+              <div class="label">Total recaudado</div>
+            </div>
+            <div class="card">
+              <div class="value">${totalItems}</div>
+              <div class="label">Unidades vendidas</div>
+            </div>
+          </div>
+
+          ${topProducts.length > 0 ? `
+            <div class="section-title">Productos más vendidos</div>
+            <table>
+              <tr><th>#</th><th>Producto</th><th>Unidades</th><th>Total</th></tr>
+              ${topProducts.map((p, i) => `
+                <tr>
+                  <td>${i + 1}</td>
+                  <td>${p.name}</td>
+                  <td>${p.qty}</td>
+                  <td class="total">S/ ${p.revenue.toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </table>
+          ` : ''}
+
+          ${Object.keys(byMethod).length > 0 ? `
+            <div class="section-title">Por método de pago</div>
+            <table>
+              <tr><th>Método</th><th>Total</th></tr>
+              ${Object.entries(byMethod).map(([m, a]) => `
+                <tr><td>${m}</td><td class="total">S/ ${(a as number).toFixed(2)}</td></tr>
+              `).join('')}
+            </table>
+          ` : ''}
+
+          ${currentOrders.length > 0 ? `
+            <div class="section-title">Detalle de pedidos</div>
+            <table>
+              <tr><th>Cliente</th><th>Fecha</th><th>Método</th><th>Total</th></tr>
+              ${currentOrders.map(o => `
+                <tr>
+                  <td>${o.customerName}</td>
+                  <td>${new Date(o.date).toLocaleString('es-PE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</td>
+                  <td>${o.paymentMethod}</td>
+                  <td class="total">S/ ${o.total.toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </table>
+          ` : ''}
+
+          <p style="font-size:11px;color:#aaa;margin-top:30px;">Generado el ${new Date().toLocaleString('es-PE')} — Camelia Fashion</p>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => { printWindow.print(); }, 500);
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-card rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
@@ -70,9 +166,19 @@ export function SalesReport({ onClose }: SalesReportProps) {
           <h2 className="text-xl font-semibold text-primary flex items-center gap-2">
             <TrendingUp className="w-5 h-5" /> Informe de Ventas
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-secondary rounded-full">
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handlePrint}
+              className="flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 text-sm font-medium transition-colors"
+              title="Imprimir informe"
+            >
+              <Printer className="w-4 h-4" />
+              Imprimir
+            </button>
+            <button onClick={onClose} className="p-2 hover:bg-secondary rounded-full">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Selector día / mes */}
