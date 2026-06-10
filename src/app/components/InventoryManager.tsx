@@ -80,8 +80,18 @@ export function InventoryManager({ onAddProduct, onUpdateProduct, editProduct, o
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 500 * 1024) {
-      alert('La imagen es mayor a 500 KB. Se recomienda usar imágenes más pequeñas o una URL externa.');
+    if (file.size > 300 * 1024) {
+      alert(
+        `⚠️ La imagen es demasiado grande (${(file.size / 1024).toFixed(0)} KB).\n\n` +
+        `Firestore solo permite documentos de hasta 1 MB y las imágenes en base64 ocupan mucho espacio.\n\n` +
+        `👉 Solución recomendada:\n` +
+        `1. Sube tu foto en imgbb.com (gratis, sin registro)\n` +
+        `2. Copia el "Direct link"\n` +
+        `3. Pégalo en el campo "o usa una URL"\n\n` +
+        `Tamaño máximo para subir directo: 300 KB`
+      );
+      e.target.value = '';
+      return;
     }
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -163,17 +173,26 @@ export function InventoryManager({ onAddProduct, onUpdateProduct, editProduct, o
                   <label className="flex flex-col items-center cursor-pointer">
                     <Upload className="w-10 h-10 text-muted-foreground mb-2" />
                     <span className="text-sm text-muted-foreground">Click para subir imagen</span>
-                    <span className="text-xs text-muted-foreground mt-1">Recomendado: menos de 500 KB</span>
+                    <span className="text-xs text-muted-foreground mt-1">Máximo 300 KB</span>
                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   </label>
                   <div className="flex items-center gap-2">
                     <hr className="flex-1 border-border" />
-                    <span className="text-xs text-muted-foreground">o usa una URL</span>
+                    <span className="text-xs font-medium text-primary">✨ RECOMENDADO: usa URL</span>
                     <hr className="flex-1 border-border" />
                   </div>
-                  <input type="url" onChange={handleImageUrlChange}
-                    className="w-full px-3 py-2 border border-border rounded-md bg-input-background text-sm"
-                    placeholder="https://ejemplo.com/imagen.jpg" />
+                  <div>
+                    <input type="url" onChange={handleImageUrlChange}
+                      className="w-full px-3 py-2 border border-primary/50 rounded-md bg-input-background text-sm"
+                      placeholder="https://i.ibb.co/tu-imagen.jpg" />
+                    <p className="text-xs text-primary mt-1">
+                      💡 Sube gratis en{' '}
+                      <a href="https://imgbb.com" target="_blank" rel="noreferrer" className="underline font-medium">
+                        imgbb.com
+                      </a>{' '}
+                      y pega el "Direct link" aquí
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
