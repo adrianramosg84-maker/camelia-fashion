@@ -15,9 +15,10 @@ const COLOR_MAP: Record<string, string> = {
 interface ProductCardProps {
   product: Product;
   onAddToCart: (product: Product, selectedSize?: string, selectedColor?: string) => void;
+  isPublicView?: boolean;
 }
 
-export function ProductCard({ product, onAddToCart }: ProductCardProps) {
+export function ProductCard({ product, onAddToCart, isPublicView = false }: ProductCardProps) {
   const isOutOfStock = product.stock === 0;
   const [selectedSize, setSelectedSize] = useState<string | undefined>(
     product.sizes && product.sizes.length === 1 ? product.sizes[0] : undefined
@@ -74,8 +75,8 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           </span>
         </p>
 
-        {/* Selector de tallas */}
-        {needsSize && (
+        {/* Selector de tallas — solo en vista pública */}
+        {isPublicView && needsSize && (
           <div className="mb-3">
             <p className="text-xs text-muted-foreground mb-1">Talla:</p>
             <div className="flex flex-wrap gap-1">
@@ -96,8 +97,8 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           </div>
         )}
 
-        {/* Selector de colores */}
-        {needsColor && (
+        {/* Selector de colores — solo en vista pública */}
+        {isPublicView && needsColor && (
           <div className="mb-3">
             <p className="text-xs text-muted-foreground mb-1">
               Color: {selectedColor && <span className="font-medium text-foreground">{selectedColor}</span>}
@@ -123,8 +124,8 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           </div>
         )}
 
-        {/* Aviso si falta seleccionar */}
-        {!isOutOfStock && !canAdd && (
+        {/* Aviso si falta seleccionar — solo en vista pública */}
+        {isPublicView && !isOutOfStock && !canAdd && (
           <p className="text-xs text-amber-600 mb-1">
             {!selectedSize && needsSize && !selectedColor && needsColor
               ? 'Selecciona talla y color'
@@ -134,19 +135,21 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           </p>
         )}
 
-        {/* Botón agregar */}
-        <button
-          onClick={() => canAdd && onAddToCart(product, selectedSize, selectedColor)}
-          disabled={!canAdd}
-          className={`mt-auto w-full flex items-center justify-center gap-2 py-2 px-4 rounded-md transition-all ${
-            !canAdd
-              ? 'bg-muted text-muted-foreground cursor-not-allowed'
-              : 'bg-primary text-primary-foreground hover:opacity-90 hover:shadow-md'
-          }`}
-        >
-          <ShoppingCart className="w-4 h-4" />
-          {isOutOfStock ? 'Agotado' : 'Agregar'}
-        </button>
+        {/* Botón agregar — solo en vista pública */}
+        {isPublicView && (
+          <button
+            onClick={() => canAdd && onAddToCart(product, selectedSize, selectedColor)}
+            disabled={!canAdd}
+            className={`mt-auto w-full flex items-center justify-center gap-2 py-2 px-4 rounded-md transition-all ${
+              !canAdd
+                ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                : 'bg-primary text-primary-foreground hover:opacity-90 hover:shadow-md'
+            }`}
+          >
+            <ShoppingCart className="w-4 h-4" />
+            {isOutOfStock ? 'Agotado' : 'Agregar'}
+          </button>
+        )}
 
         {/* Botón comentarios */}
         <button

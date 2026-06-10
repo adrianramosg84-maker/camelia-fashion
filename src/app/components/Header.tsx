@@ -149,19 +149,21 @@ export function Header({
             </button>
           )}
 
-          {/* Carrito */}
-          <button
-            onClick={onCartClick}
-            className="relative p-2 hover:bg-secondary rounded-full transition-colors"
-            title="Carrito de compras"
-          >
-            <ShoppingBag className="w-5 h-5" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                {cartCount > 99 ? '99+' : cartCount}
-              </span>
-            )}
-          </button>
+          {/* Carrito — solo en vista pública */}
+          {isPublicView && (
+            <button
+              onClick={onCartClick}
+              className="relative p-2 hover:bg-secondary rounded-full transition-colors"
+              title="Carrito de compras"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </header>
